@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 type Props = {
   name: string;
@@ -23,34 +23,69 @@ export const UseState = ({ name }: Props) => {
     confirmed: false,
   });
 
+  const onConfirm = () => {
+    setState({
+      ...state,
+      error: false,
+      loading: false,
+      confirmed: true,
+    });
+  };
+
+  const onError = () => {
+    setState({
+      ...state,
+      error: true,
+      loading: false,
+    });
+  };
+
+  const onWrite = (e: ChangeEvent<HTMLInputElement>) => {
+    setState({ ...state, value: e.target.value });
+  };
+
+  const onCheck = () => {
+    setState({
+      ...state,
+      loading: true,
+    });
+  };
+
+  const onDelete = () => {
+    setState({
+      ...state,
+      deleted: true,
+    });
+  };
+
+  const onReset = () => {
+    setState({
+      ...state,
+      confirmed: false,
+      deleted: false,
+      value: "",
+    });
+  };
+
   useEffect(() => {
     console.log("start the effect");
-    console.log(state);
 
     if (state.loading) {
       setTimeout(() => {
         console.log("start Validated");
 
         if (state.value === SECURITY_CODE) {
-          setState({
-            ...state,
-            error: false,
-            loading: false,
-            confirmed: true,
-          });
+          onConfirm();
         } else {
-          setState({
-            ...state,
-            error: true,
-            loading: false,
-          });
+          onError();
         }
 
         console.log("end validated");
       }, 1000);
     }
     console.log("end Effect");
-  }, [state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.loading]);
 
   if (!state.deleted && !state.confirmed) {
     return (
@@ -60,66 +95,26 @@ export const UseState = ({ name }: Props) => {
         {state.error && !state.loading && <p>Error: el code es incorrect</p>}
         {state.loading && <p>loading..</p>}
         <input
-          placeholder="code de security"
+          placeholder="security code"
           value={state.value}
-          onChange={(e) => {
-            setState({ ...state, value: e.target.value });
-          }}
+          onChange={onWrite}
         />
-
-        <button
-          onClick={() => {
-            setState({
-              ...state,
-              loading: true,
-            });
-          }}
-        >
-          CheckIn
-        </button>
+        <button onClick={onCheck}>CheckIn</button>
       </div>
     );
   } else if (state.confirmed && !state.deleted) {
     return (
       <>
         <p>Are you sure to delete?</p>
-        <button
-          onClick={() => {
-            setState({
-              ...state,
-              deleted: true,
-            });
-          }}
-        >
-          Yes
-        </button>
-        <button
-          onClick={() => {
-            setState({
-              ...state,
-              confirmed: false,
-            });
-          }}
-        >
-          No
-        </button>
+        <button onClick={onDelete}>Yes</button>
+        <button onClick={onReset}>No</button>
       </>
     );
   } else {
     return (
       <>
         <p>Delete Completed</p>
-        <button
-          onClick={() => {
-            setState({
-              ...state,
-              confirmed: false,
-              deleted: false,
-            });
-          }}
-        >
-          Reset, Come Back
-        </button>
+        <button onClick={onReset}>Reset, Come Back</button>
       </>
     );
   }
