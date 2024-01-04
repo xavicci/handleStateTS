@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { ChangeEvent, useEffect, useReducer } from "react";
 
 type Props = {
   name: string;
@@ -17,6 +17,30 @@ const SECURITY_CODE = "asd";
 export const UseReducer = ({ name }: Props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const onConfirm = () => {
+    dispatch({ type: ActionType.CONFIRM });
+  };
+
+  const onError = () => {
+    dispatch({ type: ActionType.ERROR });
+  };
+
+  const onWrite = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: ActionType.WRITE, payload: e.target.value });
+  };
+
+  const onCheck = () => {
+    dispatch({ type: ActionType.CHECK });
+  };
+
+  const onDelete = () => {
+    dispatch({ type: ActionType.DELETE });
+  };
+
+  const onReset = () => {
+    dispatch({ type: ActionType.RESET });
+  };
+
   useEffect(() => {
     console.log("start the effect");
 
@@ -25,9 +49,9 @@ export const UseReducer = ({ name }: Props) => {
         console.log("start Validated");
 
         if (state.value === SECURITY_CODE) {
-          dispatch({ type: ActionKind.CONFIRM });
+          onConfirm();
         } else {
-          dispatch({ type: ActionKind.ERROR });
+          onError();
         }
 
         console.log("end validated");
@@ -47,43 +71,24 @@ export const UseReducer = ({ name }: Props) => {
         <input
           placeholder="security code"
           value={state.value}
-          onChange={
-            (e) => dispatch({ type: ActionKind.WRITE, payload: e.target.value })
-            // onWrite
-          }
+          onChange={onWrite}
         />
-        <button
-          onClick={
-            () => dispatch({ type: ActionKind.DELETE })
-            // onCheck
-          }
-        >
-          CheckIn
-        </button>
+        <button onClick={onCheck}>CheckIn</button>
       </div>
     );
   } else if (state.confirmed && !state.deleted) {
     return (
       <>
         <p>Are you sure to delete?</p>
-        <button onClick={() => dispatch({ type: ActionKind.DELETE })}>
-          Yes
-        </button>
-        <button onClick={() => dispatch({ type: ActionKind.RESET })}>No</button>
+        <button onClick={onDelete}>Yes</button>
+        <button onClick={onReset}>No</button>
       </>
     );
   } else {
     return (
       <>
         <p>Delete Completed</p>
-        <button
-          onClick={
-            () => dispatch({ type: ActionKind.RESET })
-            // onReset
-          }
-        >
-          Reset, Come Back
-        </button>
+        <button onClick={onReset}>Reset, Come Back</button>
       </>
     );
   }
@@ -97,7 +102,7 @@ const initialState: CompState = {
   confirmed: false,
 };
 
-enum ActionKind {
+enum ActionType {
   CHECK = "CHECK",
   ERROR = "ERROR",
   CONFIRM = "CONFIRM",
@@ -107,35 +112,35 @@ enum ActionKind {
 }
 
 interface Action {
-  type: ActionKind;
+  type: ActionType;
   payload?: string;
 }
 
 const reducerObject = (state: CompState, action: Action) => ({
-  ERROR: {
+  [ActionType.ERROR]: {
     ...state,
     error: true,
     loading: false,
   },
-  CHECK: {
+  [ActionType.CHECK]: {
     ...state,
     loading: true,
   },
-  CONFIRM: {
+  [ActionType.CONFIRM]: {
     ...state,
     error: false,
     loading: false,
     confirmed: true,
   },
-  WRITE: {
+  [ActionType.WRITE]: {
     ...state,
     value: action.payload,
   },
-  DELETE: {
+  [ActionType.DELETE]: {
     ...state,
     deleted: true,
   },
-  RESET: {
+  [ActionType.RESET]: {
     ...state,
     confirmed: false,
     deleted: false,
