@@ -5,7 +5,7 @@ type Props = {
 };
 
 type CompState = {
-  value: string;
+  value?: string;
   error: boolean;
   loading: boolean;
   deleted: boolean;
@@ -17,10 +17,6 @@ const SECURITY_CODE = "asd";
 export const UseReducer = ({ name }: Props) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  //   const onWrite = (e: ChangeEvent<HTMLInputElement>) => {
-  //     setState({ ...state, value: e.target.value });
-  //   };
-
   useEffect(() => {
     console.log("start the effect");
 
@@ -29,9 +25,9 @@ export const UseReducer = ({ name }: Props) => {
         console.log("start Validated");
 
         if (state.value === SECURITY_CODE) {
-          dispatch({ type: "CONFIRM" });
+          dispatch({ type: ActionKind.CONFIRM });
         } else {
-          dispatch({ type: "ERROR" });
+          dispatch({ type: ActionKind.ERROR });
         }
 
         console.log("end validated");
@@ -52,13 +48,13 @@ export const UseReducer = ({ name }: Props) => {
           placeholder="security code"
           value={state.value}
           onChange={
-            (e) => dispatch({ type: "WRITE", payload: e.target.value })
+            (e) => dispatch({ type: ActionKind.WRITE, payload: e.target.value })
             // onWrite
           }
         />
         <button
           onClick={
-            () => dispatch({ type: "DELETE" })
+            () => dispatch({ type: ActionKind.DELETE })
             // onCheck
           }
         >
@@ -70,8 +66,10 @@ export const UseReducer = ({ name }: Props) => {
     return (
       <>
         <p>Are you sure to delete?</p>
-        <button onClick={() => dispatch({ type: "DELETE" })}>Yes</button>
-        <button onClick={() => dispatch({ type: "RESET" })}>No</button>
+        <button onClick={() => dispatch({ type: ActionKind.DELETE })}>
+          Yes
+        </button>
+        <button onClick={() => dispatch({ type: ActionKind.RESET })}>No</button>
       </>
     );
   } else {
@@ -80,7 +78,7 @@ export const UseReducer = ({ name }: Props) => {
         <p>Delete Completed</p>
         <button
           onClick={
-            () => dispatch({ type: "RESET" })
+            () => dispatch({ type: ActionKind.RESET })
             // onReset
           }
         >
@@ -113,7 +111,7 @@ interface Action {
   payload?: string;
 }
 
-const reducerObject = (state, action) => ({
+const reducerObject = (state: CompState, action: Action) => ({
   ERROR: {
     ...state,
     error: true,
@@ -145,6 +143,5 @@ const reducerObject = (state, action) => ({
   },
 });
 
-const reducer = (state, action) => {
-  return reducerObject(state, action)[action.type] || state;
-};
+const reducer = (state: CompState, action: Action): CompState =>
+  reducerObject(state, action)[action.type] || state;
